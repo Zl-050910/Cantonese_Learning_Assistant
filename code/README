@@ -1,0 +1,121 @@
+# 粤语学习助手——情感识别模块
+
+一款集成情感识别功能的粤语学习辅助工具，基于HuBERT等模型实现粤语语音情感分析，结合针对性数据处理与模型对比功能，为用户提供精准的个性化学习反馈。
+
+## 项目概述
+
+本项目针对粤语学习场景，通过语音情感识别技术解析用户发音时的情绪状态（如平静、开心、恐惧等），辅助调整学习指导策略。核心依托`modelscope`的粤语情感语音数据集，构建了从数据处理到模型评估的完整流程：通过处理数据类别不平衡问题优化训练数据，对比多种模型的情感识别性能，并支持实时语音/音频文件的情感分析，最终为粤语学习者提供结合情绪状态的个性化反馈。
+
+## 核心功能
+
+- 【粤语情感识别】：基于HuBERT、wav2vec2-base、E-CNN等模型，实现对粤语语音的情感分类（支持多种情感标签）。
+- 【数据处理与优化】：针对数据集类别不平衡问题（中性、happy等样本过多，fearful等样本极少），通过下采样（中性语音）和上采样（fearful等）平衡数据分布，提升模型泛化能力。
+- 【数据集可视化分析】：支持查看粤语情感语音数据集的详细信息（格式、情感标签分布、置信度、语音时长等），辅助数据理解与预处理。
+- 【模型性能对比】：对比HuBERT、wav2vec2-base与E-CNN模型的微调性能，为情感识别任务选择最优模型。
+- 【实时与离线分析】：支持输入WAV文件路径或实时语音，输出情感标签、对应置信度及所有情感的概率分布，满足多样化使用场景。
+
+## 数据来源
+
+本项目使用的情感语音数据集来自：[modelscope.cn/datasets/pengzhendong/yue_emo_speech](https://modelscope.cn/datasets/pengzhendong/yue_emo_speech/tree/master/data)，包含粤语语音样本及对应的情感标签等信息。
+
+## 安装说明
+
+### 前置要求
+- Python 3.8+
+- 依赖库：包含语音处理、深度学习框架及数据处理工具（详见`requirements.txt`，含HuBERT、wav2vec2-base相关依赖）
+
+
+### 安装步骤
+1. 克隆仓库并切换到情感识别分支：
+   ```bash
+   git clone https://github.com/Zl-050910/Cantonese_Learning_Assistant.git
+   cd Cantonese_Learning_Assistant
+   git checkout Emotion_Recognition  # 切换到含情感识别功能的分支
+   ```
+
+2. 安装依赖：
+   ```bash
+   pip install -r requirements.txt
+   ```
+
+3. （可选）手动下载数据集：从[modelscope](https://modelscope.cn/datasets/pengzhendong/yue_emo_speech)下载数据集，按脚本要求放置于指定路径（可参考数据处理脚本内的路径配置）。
+
+
+## 使用方法
+
+### 1. 数据集分析（data_look.py）
+查看粤语情感数据集的详细信息（格式、情感标签、置信度、语音时长等）：
+```bash
+python data_look.py --data_path /path/to/dataset  # 需指定数据集路径
+```
+
+
+### 2. 数据平衡处理（data_hebing.py）
+解决数据类别不平衡问题（下采样中性语音，上采样fearful等少数类）：
+```bash
+python data_hebing.py --input_data /path/to/raw_data --output_data /path/to/balanced_data
+```
+- 输出：平衡后的数据集，可直接用于模型训练。
+
+
+### 3. 模型性能对比（compare_model.py）
+对比HuBERT、wav2vec2-base与E-CNN模型的微调性能（如准确率、F1值等）：
+```bash
+python compare_model.py --test_data /path/to/test_data --model_dir /path/to/trained_models
+```
+- 输出：各模型性能指标对比表及可视化结果。
+
+
+### 4. 实时/离线情感预测（realtime_emotion_predict.py）
+- **离线分析（WAV文件）**：
+  ```bash
+  python realtime_emotion_predict.py --wav_path /path/to/your/audio.wav
+  ```
+- **实时语音分析**：
+  ```bash
+  python realtime_emotion_predict.py --realtime True
+  ```
+- 输出：预测的情感标签、对应置信度，以及所有情感类别的概率分布。
+
+
+## 技术栈
+
+- 【核心模型】：HuBERT、wav2vec2-base、E-CNN（用于情感识别微调）
+- 【语音处理】：librosa（音频特征提取）、pyaudio（实时语音采集）
+- 【数据处理】：pandas、numpy（数据清洗与平衡）
+- 【模型评估】：scikit-learn（性能指标计算与对比）
+- 【开发语言】：Python
+
+
+## 代码结构与文件说明
+
+```
+code/
+├── hubert.py               # HuBERT模型封装，包含加载、微调及情感预测逻辑
+├── realtime_emotion_predict.py  # 实时/离线情感识别模块：支持WAV文件输入和实时语音，输出情感标签、置信度及概率分布
+├── data_hebing.py          # 数据平衡处理工具：通过下采样（中性）和上采样（fearful等）解决类别不平衡问题
+├── data_look.py            # 数据集分析脚本：查看数据集格式、情感标签分布、置信度、语音时长等信息
+├── compare_model.py        # 模型对比模块：评估HuBERT、wav2vec2-base与E-CNN的微调性能
+└── requirements.txt        # 项目依赖库列表
+```
+
+
+## 贡献指南
+
+1. Fork本仓库并创建分支（`git checkout -b feature/功能名称`）
+2. 提交代码时请注明功能说明（如“优化数据上采样策略”“新增模型评估指标”）
+3. 推送分支并提交Pull Request，描述修改内容及目的
+
+
+## 许可证
+
+本项目基于[MIT许可证](LICENSE)开源，详见LICENSE文件。
+
+
+## 致谢
+
+- 感谢[ModelScope](https://modelscope.cn/)提供的粤语情感语音数据集（`pengzhendong/yue_emo_speech`）
+- 感谢HuBERT、wav2vec2-base模型开源社区及相关语音处理库的支持
+- 感谢粤语语言专家及开发者对项目的反馈与贡献
+
+如有问题或建议，欢迎提交issue交流。
